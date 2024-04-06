@@ -1,4 +1,4 @@
-# Looking-for-clientelle-project
+# Proyecto-Buscando-Clientela
 App para creadores de contenido
 Looking for clientelle project
 Una reflexión ética y constructiva sobre las dinámicas de las aplicaciones de citas y la promoción de contenido para adultos
