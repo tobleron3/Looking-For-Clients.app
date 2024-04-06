@@ -44,3 +44,7 @@ function reviewContent(contentId, moderatorId, decision, reason) {
 }
 
 Este enfoque asegura que la plataforma no solo tenga una política de moderación bien definida, sino también un equipo de moderadores bien capacitado y las herramientas técnicas para aplicar estas políticas de manera efectiva.
+
+
+    Capacitación Continua para Moderadores: Asegurarse de que los moderadores estén continuamente actualizados con las últimas políticas y técnicas de moderación.
+    Evaluación Continua del Sistema de Moderación: Monitorear la eficacia de las políticas y prácticas de moderación actuales y hacer ajustes según sea necesario para mejorar.
