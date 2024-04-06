@@ -1,0 +1,71 @@
+La autenticación de usuarios es crítica para asegurar que solo los usuarios autorizados puedan acceder a ciertas rutas y funcionalidades de la aplicación. Usaremos bcrypt para hashear contraseñas y jsonwebtoken (JWT) para manejar sesiones de usuario mediante tokens.
+Paso 1: Configurar Dependencias de Seguridad
+1.	Instalar bcrypt y jsonwebtoken:
+bash
+npm install bcrypt jsonwebtoken
+2.	Configurar variables de entorno: Crear un archivo .env en la raíz del proyecto y definir una clave secreta para JWT.
+env
+JWT_SECRET=your_jwt_secret
+Paso 2: Implementar el Registro de Usuarios
+En la ruta de registro, hashearemos la contraseña del usuario antes de guardarla en la base de datos.
+javascript
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // Insertar el usuario en la base de datos con la contraseña hasheada
+    await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+    res.status(201).send('User registered successfully');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+Paso 3: Implementar el Inicio de Sesión de Usuarios
+Cuando un usuario inicia sesión, comparamos la contraseña proporcionada con el hash almacenado en la base de datos. Si coincide, generamos un JWT.
+javascript
+const jwt = require('jsonwebtoken');
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const { rows } = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    if (rows.length > 0) {
+      const validPassword = await bcrypt.compare(password, rows[0].password);
+      if (validPassword) {
+        const token = jwt.sign({ id: rows[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token });
+      } else {
+        res.status(400).send('Invalid credentials');
+      }
+    } else {
+      res.status(404).send('User not found');
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+Paso 4: Middleware de Autenticación
+Crear un middleware que verifique el token JWT en las rutas protegidas.
+javascript
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+Este middleware puede ser utilizado en cualquier ruta que requiera autenticación:
+javascript
+app.get('/protected', authenticateToken, (req, res) => {
+  res.send('Protected content');
+});
+
