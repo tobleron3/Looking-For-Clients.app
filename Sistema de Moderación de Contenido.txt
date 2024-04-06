@@ -1,0 +1,76 @@
+Paso 1: Moderación Automatizada
+
+La moderación automatizada puede ser una primera línea de defensa eficaz para filtrar contenido inapropiado rápidamente y a gran escala. Podemos utilizar servicios de IA disponibles comercialmente que se especializan en la detección de contenido inapropiado, como nudez, lenguaje ofensivo, y violencia.
+
+    Elegir un Proveedor de Servicios de IA: Seleccionar un proveedor que ofrezca una API para la moderación de contenido, como AWS Rekognition, Google Cloud Vision API, o Microsoft Azure Content Moderator.
+
+    Integración de la API de Moderación de Contenido:
+    Implementar una función que llame a la API del proveedor seleccionado antes de permitir que el contenido sea publicado en la plataforma.
+
+Paso 2: Moderación Humana
+
+La moderación humana es crucial para revisar el contenido marcado por los usuarios o por el sistema de moderación automatizado. Esto asegura que el contenido que cae en áreas grises sea revisado con un entendimiento contextual y cultural.
+
+    Panel de Moderación para Revisores:
+    Desarrollar una interfaz de usuario que permita a los revisores humanos ver el contenido reportado, tomar decisiones sobre su apropiación, y realizar acciones necesarias, como eliminar el contenido o advertir al usuario.
+
+    Proceso de Reporte de Contenido por Usuarios:
+    Implementar una función que permita a los usuarios reportar contenido que consideren inapropiado, lo cual lo marca automáticamente para revisión por el equipo de moderación humana.
+
+Implementación Técnica
+
+Integración con un Servicio de IA para Moderación de Contenido:
+
+Suponiendo una integración genérica con un servicio como AWS Rekognition para la detección de imágenes inapropiadas.
+
+javascript
+
+const AWS = require('aws-sdk');
+
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION
+});
+
+const rekognition = new AWS.Rekognition();
+
+function checkContentForInappropriateness(imageBytes) {
+  return new Promise((resolve, reject) => {
+    const params = {
+      Image: {
+        Bytes: imageBytes
+      },
+      MinConfidence: 70
+    };
+    
+    rekognition.detectModerationLabels(params, function(err, data) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data.ModerationLabels);
+      }
+    });
+  });
+}
+
+Panel de Moderación para Revisores:
+
+El desarrollo de una interfaz de usuario completa para la moderación humana excede este formato, pero implica crear vistas de administrador donde los moderadores puedan revisar el contenido, ver reportes, y tomar acciones.
+
+Proceso de Reporte de Usuario:
+
+javascript
+
+app.post('/report-content', authenticateToken, async (req, res) => {
+  const { userId, contentId, reason } = req.body;
+
+  try {
+    // Asumiendo la existencia de una tabla 'reports' para almacenar los reportes
+    await pool.query('INSERT INTO reports (userId, contentId, reason) VALUES ($1, $2, $3)', [userId, contentId, reason]);
+    res.send('Content reported successfully');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
