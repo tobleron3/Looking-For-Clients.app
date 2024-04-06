@@ -1,0 +1,70 @@
+Paso 1: Diseño del Proceso de Verificación de Edad
+
+Para la verificación de edad, se puede optar por integrar servicios de terceros que proporcionen verificaciones de identidad y edad confiables. Estos servicios pueden ayudar a automatizar el proceso manteniendo altos niveles de precisión y seguridad.
+
+    Elegir un Proveedor de Servicios de Verificación de Edad: Seleccionar un proveedor como Veriff, Jumio, o cualquier otro que cumpla con las normativas locales e internacionales.
+
+    Integración del Servicio de Verificación de Edad: Implementar la API del proveedor elegido en el flujo de registro o acceso al contenido para adultos de la plataforma.
+
+Paso 2: Obtención del Consentimiento Explícito
+
+Es importante asegurarse de que los usuarios entiendan el tipo de contenido que estarán viendo y que den su consentimiento de manera informada.
+
+    Diseñar un Formulario de Consentimiento: Crear un formulario claro y conciso que describa la naturaleza del contenido. Este formulario debe requerir una acción afirmativa por parte del usuario, como marcar una casilla, para indicar su consentimiento.
+
+    Almacenar el Consentimiento de Forma Segura: Registrar el consentimiento del usuario en la base de datos de manera que quede asociado con su perfil, asegurando que se pueda verificar su consentimiento de manera auditada si es necesario.
+
+Implementación Técnica
+
+Integración con un Servicio de Verificación de Edad:
+
+Por razones de simplicidad, este ejemplo asumirá una integración genérica con un servicio de terceros para la verificación de edad. En la práctica, deberás seguir la documentación específica del proveedor elegido.
+
+javascript
+
+app.post('/verify-age', async (req, res) => {
+  const { userId, documentId } = req.body;
+  
+  try {
+    const verificationResult = await verifyAgeWithThirdPartyService(userId, documentId);
+    if (verificationResult.verified) {
+      // Actualizar la base de datos para reflejar la verificación de edad
+      await pool.query('UPDATE users SET ageVerified = TRUE WHERE id = $1', [userId]);
+      res.send('Age verified successfully');
+    } else {
+      res.status(400).send('Age verification failed');
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+// Esta función es un marcador de posición y debe ser reemplazada por la integración real
+async function verifyAgeWithThirdPartyService(userId, documentId) {
+  // Lógica de integración con el servicio de terceros
+  return { verified: true }; // Simula una respuesta exitosa
+}
+
+Obtención y Registro del Consentimiento Explícito:
+
+javascript
+
+app.post('/consent', authenticateToken, async (req, res) => {
+  const userId = req.user.id; // Asumiendo que el ID del usuario está incluido en el token JWT
+  const consentGiven = req.body.consent;
+
+  if (consentGiven) {
+    try {
+      await pool.query('UPDATE users SET consentGiven = TRUE WHERE id = $1', [userId]);
+      res.send('Consent recorded successfully');
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server error');
+    }
+  } else {
+    res.status(400).send('Consent not given');
+  }
+});
+
+Con estas implementaciones, has establecido un proceso para verificar la edad de los usuarios y obtener su consentimiento de manera informada y segura antes de permitirles acceder a contenido para adultos.
