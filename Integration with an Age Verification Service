@@ -1,0 +1,23 @@
+app.post('/verify-age', async (req, res) => {
+  const { userId, documentId } = req.body;
+
+  try {
+    const verificationResult = await verifyAgeWithThirdPartyService(userId, documentId);
+    if (verificationResult.verified) {
+      // Update the database to reflect the age verification
+      await pool.query('UPDATE users SET ageVerified = TRUE WHERE id = $1', [userId]);
+      res.send('Age verified successfully');
+    } else {
+      res.status(400).send('Age verification failed');
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+// This function is a placeholder and should be replaced by the actual integration
+async function verifyAgeWithThirdPartyService(userId, documentId) {
+  // Integration logic with the third-party service
+  return { verified: true }; // Simulate a successful response
+}
