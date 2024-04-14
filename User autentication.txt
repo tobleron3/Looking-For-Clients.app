@@ -1,0 +1,91 @@
+User authentication is critical to ensure that only authorized users can access certain routes and functionalities of the application. We will use bcrypt to hash passwords and jsonwebtoken (JWT) for managing user sessions via tokens.
+Step 1: Set Up Security Dependencies
+
+    Install bcrypt and jsonwebtoken:
+
+bash
+
+npm install bcrypt jsonwebtoken
+
+    Set up environment variables: Create a .env file at the root of the project and define a secret key for JWT.
+
+env
+
+JWT_SECRET=your_jwt_secret
+
+Step 2: Implement User Registration
+
+In the registration route, we will hash the user's password before saving it to the database.
+
+javascript
+
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // Insert the user into the database with the hashed password
+    await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+    res.status(201).send('User registered successfully');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+Step 3: Implement User Login
+
+When a user logs in, we compare the provided password with the hash stored in the database. If it matches, we generate a JWT.
+
+javascript
+
+const jwt = require('jsonwebtoken');
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const { rows } = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    if (rows.length > 0) {
+      const validPassword = await bcrypt.compare(password, rows[0].password);
+      if (validPassword) {
+        const token = jwt.sign({ id: rows[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token });
+      } else {
+        res.status(400).send('Invalid credentials');
+      }
+    } else {
+      res.status(404).send('User not found');
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+Step 4: Authentication Middleware
+
+Create a middleware that verifies the JWT token on protected routes.
+
+javascript
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+This middleware can be used on any route that requires authentication:
+
+javascript
+
+app.get('/protected', authenticateToken, (req, res) => {
+  res.send('Protected content');
+});
