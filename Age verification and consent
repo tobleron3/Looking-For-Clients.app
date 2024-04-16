@@ -2,8 +2,6 @@ Step 1: Age Verification Process Design
 
 For age verification, opting to integrate third-party services that provide reliable identity and age checks is advisable. These services can help automate the process while maintaining high levels of accuracy and security.
 
-     
-
     Integrating the Age Verification Service: Implement the API of the chosen provider in the registration flow or access to adult content on the platform.
 
 Step 2: Obtaining Explicit Consent
