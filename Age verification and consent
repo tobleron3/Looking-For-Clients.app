@@ -2,7 +2,7 @@ Step 1: Age Verification Process Design
 
 For age verification, opting to integrate third-party services that provide reliable identity and age checks is advisable. These services can help automate the process while maintaining high levels of accuracy and security.
 
-    Choosing an Age Verification Service Provider: Select a provider like Veriff, Jumio, or another that complies with local and international regulations.
+     
 
     Integrating the Age Verification Service: Implement the API of the chosen provider in the registration flow or access to adult content on the platform.
 
@@ -14,3 +14,9 @@ It is important to ensure that users understand the type of content they will be
 
     Securely Storing Consent: Record the user's consent in the database in a way that it is associated with their profile, ensuring that their consent can be audited if necessary.
 
+DIY approaches:
+
+    Develop a custom age verification system using common web development frameworks (like React, Angular, or Vue.js). You can set up a simple form asking users to enter their birthdate, and then verify if the age meets the legal requirements for accessing adult content.
+    For consent management, you can create a straightforward agreement form or pop-up that explains the terms of content consumption and requires user acceptance before proceeding.
+
+Ensure that your age verification and consent management tools comply with local and international laws such as COPPA in the U.S., GDPR in Europe, and other specific regulations governing adult content.
